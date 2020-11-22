@@ -1,11 +1,8 @@
 // Antoni Koszowski (418333) &
 //    Grzegorz Zaleski (418494)
 
-#include <iostream>
-#include <string>
 #include <cassert>
 #include "geometry.h"
-using namespace std;
 
 Geoobject::Geoobject(bint x, bint y) : px(x), py(y) {};
 
@@ -24,18 +21,10 @@ bool Geoobject::operator ==(const Geoobject &gobj) const
     return px == gobj.px && py == gobj.py;
 }
 
-Geoobject Geoobject::operator+=(const Vector &vec)
-{
-    this->px += vec.px;
-    this->py += vec.py;
-    return *this;
-}
-
 Position::Position(bint x, bint y) : Geoobject(x, y) {};
+
 Position::Position(const Vector &vec) : Geoobject(vec.x(), vec.y()) {};
 
-
-// TODO Do poprawy, rozrysować
 Position Position::reflection() const
 {
     return Position(py, px);
@@ -45,6 +34,13 @@ const Position &Position::origin()
 {
     static Position origin = Position(0, 0);
     return origin;
+}
+
+Position& Position::operator+=(const Vector &vec)
+{
+    this->px += vec.x();
+    this->py += vec.y();
+    return *this;
 }
 
 const Position operator +(const Position &pos, const Vector &vec)
@@ -69,6 +65,13 @@ Vector::Vector(const Position &pos) : Geoobject(pos.x(), pos.y()){}
 Vector Vector::reflection() const
 {
     return Vector(py, px);
+}
+
+Vector& Vector::operator+=(const Vector &vec)
+{
+    this->px += vec.px;
+    this->py += vec.py;
+    return *this;
 }
 
 const Vector operator +(const Vector &vec1, const Vector &vec2)
@@ -113,10 +116,9 @@ Position Rectangle::pos() const
     return rpos;
 }
 
-// TODO czy na pewno?
 Rectangle Rectangle::reflection() const
 {
-    return Rectangle(rwidth, rheight, Position(rpos.reflection()));
+    return Rectangle(rheight, rwidth, Position(rpos.reflection()));
 }
 
 bool Rectangle::operator==(const Rectangle &rec) const
@@ -124,7 +126,7 @@ bool Rectangle::operator==(const Rectangle &rec) const
     return rpos == rec.pos() && rwidth == rec.width() && rheight == rec.height();
 }
 
-Rectangle Rectangle::operator+=(const Vector &vec)
+Rectangle &Rectangle::operator+=(const Vector &vec)
 {
     this->rpos += vec;
     return *this;
@@ -163,8 +165,6 @@ const Rectangle& Rectangles::operator[](bint id) const
     return tab[id];
 }
 
-
-
 bool Rectangles::operator==(const Rectangles &recs) const
 {
     if (this->size() == recs.size())
@@ -181,7 +181,7 @@ bool Rectangles::operator==(const Rectangles &recs) const
     return false;
 }
 
-Rectangles Rectangles::operator+=(const Vector &vec)
+Rectangles &Rectangles::operator+=(const Vector &vec)
 {
     for (auto &rec: this->tab)
     {
@@ -214,22 +214,18 @@ const Rectangles operator+(const Vector &vec, Rectangles &&recs)
     return std::move(recs) + vec;
 }
 
-static void show_rec(Rectangle &rec)
-{
-    cout << "(" << rec.pos().x() << ", " << rec.pos().y()  << ") ";
-    cout << "(" << rec.pos().x() + rec.width() << ", " << rec.pos().y()  << ") ";
-    cout << "(" << rec.pos().x() + rec.width() << ", " << rec.pos().y() + rec.height()  << ") ";
-    cout << "(" << rec.pos().x() << ", " << rec.pos().y() + rec.height()  << ") ";
-}
-
 static inline bool check_merge_hori(const Rectangle &rec1, const Rectangle &rec2)
 {
-    return rec1.width() == rec2.width() && rec1.pos().y() + rec1.height() == rec2.pos().y();
+    return rec1.width() == rec2.width()
+        && rec1.pos().y() + rec1.height() == rec2.pos().y()
+        && rec1.pos().x() == rec2.pos().x();
 }
 
 static inline bool check_merge_vert(const Rectangle &rec1, const Rectangle &rec2)
 {
-    return rec1.height() == rec2.height() && rec1.pos().x() + rec1.width() == rec2.pos().x();
+    return rec1.height() == rec2.height()
+        && rec1.pos().x() + rec1.width() == rec2.pos().x()
+        && rec1.pos().y() == rec2.pos().y();
 }
 
 Rectangle merge_horizontally(const Rectangle &rec1, const Rectangle &rec2)
@@ -240,10 +236,9 @@ Rectangle merge_horizontally(const Rectangle &rec1, const Rectangle &rec2)
 
 Rectangle merge_vertically(const Rectangle &rec1, const Rectangle &rec2)
 {
-    assert(check_merge_hori(rec1, rec2));
+    assert(check_merge_vert(rec1, rec2));
     return Rectangle(rec1.width() + rec2.width(), rec2.height(), rec1.pos());
 }
-
 
 Rectangle merge_all(const Rectangles &recs)
 {
@@ -253,11 +248,11 @@ Rectangle merge_all(const Rectangles &recs)
     {
         if (check_merge_hori(result, recs[i]))
         {
-            merge_horizontally(result, recs[i]);
+            result = merge_horizontally(result, recs[i]);
         }
         else if (check_merge_vert(result, recs[i]))
         {
-            merge_vertically(result, recs[i]);
+            result = merge_vertically(result, recs[i]);
         }
         else
         {
@@ -268,14 +263,3 @@ Rectangle merge_all(const Rectangles &recs)
 }
 
 
-int main ()
-{
-    Position p1(1, 2);
-    Vector v1(p1);
-    Vector v2(2, 3);
-    Position p2(v2);
-    p2 = Position(v1);
-    v1 = Vector(p2);
-    Rectangle ret(5, 5, p1);
-    show_rec(ret);
-}

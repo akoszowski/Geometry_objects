@@ -17,7 +17,6 @@ class Geoobject
 protected:
     bint px, py;
 
-    // Zagwarantowanie niekonstruktowności klasy.
     Geoobject (bint x, bint y);
 
 public:
@@ -27,8 +26,6 @@ public:
     bint y() const;
 
     bool operator ==(const Geoobject &gobj) const;
-
-    Geoobject operator+=(const Vector &vec);
 };
 
 class Position;
@@ -41,6 +38,8 @@ public:
     explicit Vector(const Position &pos);
 
     Vector reflection() const;
+
+    Vector& operator+=(const Vector& vec);
 
     friend const Vector operator +(const Vector &vec1, const Vector &vec2);
 };
@@ -55,6 +54,8 @@ public:
     Position reflection() const;
 
     static const Position &origin();
+
+    Position& operator+=(const Vector&);
 
     friend const Position operator +(const Position &pos, const Vector &vec);
 
@@ -83,7 +84,7 @@ public:
 
     bool operator==(const Rectangle &rec) const;
 
-    Rectangle operator+=(const Vector &vec);
+    Rectangle &operator+=(const Vector &vec);
 
     friend const Rectangle operator +(const Rectangle &rec, const Vector &vec);
 
@@ -99,8 +100,6 @@ public:
 
     Rectangles(initializer_list<Rectangle> rects);
 
-    // TODO Copy/ move constructor/assignment
-
     bint size() const;
 
     Rectangle& operator[](bint id);
@@ -109,7 +108,7 @@ public:
 
     bool operator==(const Rectangles &recs) const;
 
-    Rectangles operator+=(const Vector &vec);
+    Rectangles &operator+=(const Vector &vec);
 
     friend const Rectangles operator+(const Rectangles &recs, const Vector &vec);
 
@@ -121,9 +120,9 @@ public:
 
 };
 
-Rectangle merge_horizontally(const Rectangle &rec1, const Rectangle &rec2)
+Rectangle merge_horizontally(const Rectangle &rec1, const Rectangle &rec2);
 
-Rectangle merge_vertically(const Rectangle &rec1, const Rectangle &rec2)
+Rectangle merge_vertically(const Rectangle &rec1, const Rectangle &rec2);
 
 Rectangle merge_all(const Rectangles &recs);
 
