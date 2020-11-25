@@ -1,4 +1,3 @@
-
 #ifndef ZAMLICZENIOWY_GEOMETRY_H
 #define ZAMLICZENIOWY_GEOMETRY_H
 
@@ -6,30 +5,50 @@
 #include <vector>
 #include <initializer_list>
 
+// Simplifying code.
 using bint = int32_t;
 using std::vector;
-using std::initializer_list;
 
 class Vector;
 
+// Generic class representing a geometric object with (x, y) coordinates
+// on the Cartesian Plane.
 class Geoobject
 {
 protected:
     bint px, py;
 
+    // So that it could be invoked either from class Position or class Vector.
     Geoobject (bint x, bint y);
 
 public:
-
     bint x() const;
 
     bint y() const;
 
-    bool operator ==(const Geoobject &gobj) const;
+    bool operator==(const Geoobject &gobj) const;
 };
 
-class Position;
+// Class representing a point (position on plane), with (x, y) coordinates.
+class Position: public Geoobject
+{
+public:
+    Position(bint x, bint y);
 
+    explicit Position(const Vector &vec);
+
+    Position reflection() const;
+
+    static const Position& origin();
+
+    Position& operator+=(const Vector&);
+
+    friend const Position operator+(const Position &pos, const Vector &vec);
+
+    friend const Position operator+(const Vector &vec, const Position &pos);
+};
+
+// Class representing a vector defined by (x, y) coordinates.
 class Vector: public Geoobject
 {
 public:
@@ -41,27 +60,11 @@ public:
 
     Vector& operator+=(const Vector& vec);
 
-    friend const Vector operator +(const Vector &vec1, const Vector &vec2);
+    friend const Vector operator+(const Vector &vec1, const Vector &vec2);
 };
 
-class Position: public Geoobject
-{
-public:
-    Position(bint x, bint y);
-
-    explicit Position(const Vector &vec);
-
-    Position reflection() const;
-
-    static const Position &origin();
-
-    Position& operator+=(const Vector&);
-
-    friend const Position operator +(const Position &pos, const Vector &vec);
-
-    friend const Position operator +(const Vector &vec, const Position &pos);
-};
-
+// Class representing a rectangle defined by (x,y) coordinates
+// of left bottom corner as well as width and height parameters.
 class Rectangle
 {
     bint rwidth, rheight;
@@ -84,13 +87,14 @@ public:
 
     bool operator==(const Rectangle &rec) const;
 
-    Rectangle &operator+=(const Vector &vec);
+    Rectangle& operator+=(const Vector &vec);
 
-    friend const Rectangle operator +(const Rectangle &rec, const Vector &vec);
+    friend const Rectangle operator+(const Rectangle &rec, const Vector &vec);
 
-    friend const Rectangle operator +(const Vector &vec, const Rectangle &rec);
+    friend const Rectangle operator+(const Vector &vec, const Rectangle &rec);
 };
 
+// Class representing a collection of objects of class Rectangle.
 class Rectangles
 {
     vector<Rectangle> tab;
@@ -98,17 +102,17 @@ class Rectangles
 public:
     Rectangles();
 
-    Rectangles(initializer_list<Rectangle> rects);
+    Rectangles(std::initializer_list<Rectangle> rects);
 
-    bint size() const;
+    size_t size() const;
 
-    Rectangle& operator[](bint id);
+    Rectangle& operator[](size_t id);
 
-    const Rectangle& operator[](bint id) const;
+    const Rectangle& operator[](size_t id) const;
 
     bool operator==(const Rectangles &recs) const;
 
-    Rectangles &operator+=(const Vector &vec);
+    Rectangles& operator+=(const Vector &vec);
 
     friend const Rectangles operator+(const Rectangles &recs, const Vector &vec);
 

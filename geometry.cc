@@ -1,4 +1,4 @@
-// Antoni Koszowski (418333) &
+//    Antoni Koszowski (418333) &
 //    Grzegorz Zaleski (418494)
 
 #include <cassert>
@@ -16,7 +16,7 @@ bint Geoobject::y() const
     return py;
 }
 
-bool Geoobject::operator ==(const Geoobject &gobj) const
+bool Geoobject::operator==(const Geoobject &gobj) const
 {
     return px == gobj.px && py == gobj.py;
 }
@@ -30,7 +30,7 @@ Position Position::reflection() const
     return Position(py, px);
 }
 
-const Position &Position::origin()
+const Position& Position::origin()
 {
     static Position origin = Position(0, 0);
     return origin;
@@ -43,7 +43,7 @@ Position& Position::operator+=(const Vector &vec)
     return *this;
 }
 
-const Position operator +(const Position &pos, const Vector &vec)
+const Position operator+(const Position &pos, const Vector &vec)
 {
     Position result = pos;
     result.px += vec.x();
@@ -51,7 +51,7 @@ const Position operator +(const Position &pos, const Vector &vec)
     return result;
 }
 
-const Position operator +(const Vector &vec, const Position &pos)
+const Position operator+(const Vector &vec, const Position &pos)
 {
     Position result = pos;
     result.px += vec.x();
@@ -59,8 +59,9 @@ const Position operator +(const Vector &vec, const Position &pos)
     return result;
 }
 
-Vector::Vector(bint x, bint y) : Geoobject(x, y) {}
-Vector::Vector(const Position &pos) : Geoobject(pos.x(), pos.y()){}
+Vector::Vector(bint x, bint y) : Geoobject(x, y) {};
+
+Vector::Vector(const Position &pos) : Geoobject(pos.x(), pos.y()){};
 
 Vector Vector::reflection() const
 {
@@ -69,21 +70,19 @@ Vector Vector::reflection() const
 
 Vector& Vector::operator+=(const Vector &vec)
 {
-    this->px += vec.px;
-    this->py += vec.py;
+    this->px += vec.x();
+    this->py += vec.y();
     return *this;
 }
 
-const Vector operator +(const Vector &vec1, const Vector &vec2)
+const Vector operator+(const Vector &vec1, const Vector &vec2)
 {
     Vector result = vec1;
-    result.px += vec2.px;
-    result.py += vec2.py;
+    result.px += vec2.x();
+    result.py += vec2.y();
     return result;
 }
 
-
-// Wiadomość assert
 Rectangle::Rectangle(bint width, bint height, Position pos)
         : rwidth(width), rheight(height), rpos(pos)
 {
@@ -113,7 +112,7 @@ bint Rectangle::area() const
 
 Position Rectangle::pos() const
 {
-    return rpos;
+    return Position(rpos);
 }
 
 Rectangle Rectangle::reflection() const
@@ -146,20 +145,20 @@ const Rectangle operator+(const Vector &vec, const Rectangle &rec)
 
 Rectangles::Rectangles() : tab() {};
 
-Rectangles::Rectangles(initializer_list<Rectangle> rects) : tab(rects) {};
+Rectangles::Rectangles(std::initializer_list<Rectangle> rects) : tab(rects) {};
 
-bint Rectangles::size() const
+size_t Rectangles::size() const
 {
     return tab.size();
 }
 
-Rectangle& Rectangles::operator[](bint id)
+Rectangle& Rectangles::operator[](size_t id)
 {
     assert(id >= 0 && id < tab.size());
     return tab[id];
 }
 
-const Rectangle& Rectangles::operator[](bint id) const
+const Rectangle& Rectangles::operator[](size_t id) const
 {
     assert(id >= 0 && id < tab.size());
     return tab[id];
@@ -169,7 +168,7 @@ bool Rectangles::operator==(const Rectangles &recs) const
 {
     if (this->size() == recs.size())
     {
-        for (int i = 0; i < this->size(); ++i)
+        for (size_t i = 0; i < this->size(); ++i)
         {
             if (!(this->tab[i] == recs.tab[i]))
                 return false;
@@ -244,7 +243,7 @@ Rectangle merge_all(const Rectangles &recs)
 {
     assert(recs.size());
     Rectangle result = recs[0];
-    for (int i = 1; i < recs.size(); ++i)
+    for (size_t i = 1; i < recs.size(); ++i)
     {
         if (check_merge_hori(result, recs[i]))
         {
@@ -259,7 +258,6 @@ Rectangle merge_all(const Rectangles &recs)
             assert(false);
         }
     }
+
     return result;
 }
-
-
